@@ -26,3 +26,6 @@ cd frontend
 npm install
 npm run dev
 ```
+
+## API Documentation
+[https://documenter.getpostman.com/view/19388406/2sAYQamrN4](https://documenter.getpostman.com/view/19388406/2sAYQamrN4)
