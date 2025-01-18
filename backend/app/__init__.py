@@ -1,9 +1,6 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-
-db = SQLAlchemy()
-migrate = Migrate()
+from .api.routes import register_routes
+from .extensions import db, migrate
 
 def create_app():
     app = Flask(__name__)
@@ -13,6 +10,6 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     
-    # todo: register routes
+    register_routes(app)
     
     return app
