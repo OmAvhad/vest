@@ -1,11 +1,34 @@
 import "./App.css";
-import { HistoricalData } from "./components/charts/HistoricalData";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
+import { Dashboard } from "./pages/Dashboard";
+import { ProtectedRoute } from "./utils/ProtectedRoute";
+import { ToastContainer } from "react-toastify";
+import { Home } from "./pages/Home";
 
 function App() {
   return (
     <>
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">Historical Data</h1>
-      <HistoricalData />
+      <AuthProvider>
+        <Router>
+          <ToastContainer />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Router>
+      </AuthProvider>
     </>
   );
 }

@@ -1,4 +1,4 @@
-from ..models.historical_price import HistoricalPrice
+from ..models.historical_price_model import HistoricalPrice
 
 
 class HistoricalPriceService:

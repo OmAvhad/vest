@@ -1,8 +1,8 @@
 // import { TrendingUp } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { Datepicker } from "flowbite-react";
+import api from "@/api/axios";
 
 import {
   Card,
@@ -62,8 +62,8 @@ export function HistoricalData() {
       );
     }
 
-    axios
-      .get("http://localhost:5000/api/historical_prices", { params })
+    api
+      .get("/historical_prices", { params })
       .then((response) => {
         setHistoricalPrices(response.data);
       })
