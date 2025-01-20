@@ -98,7 +98,9 @@ export function Register() {
             />
           </div>
           {loading ? (
-            <Spinner className="w-10 h-10 text-blue-500" />
+            <div className="flex justify-center">
+              <Spinner className="w-10 h-10 text-blue-500" />
+            </div>
           ) : (
             <Button className="bg-blue-500 hover:bg-blue-600" type="submit">
               Submit

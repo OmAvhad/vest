@@ -10,7 +10,7 @@ const TradeModal = ({ isOpen, onClose, stock, type }) => {
   const handleTrade = async (e) => {
     e.preventDefault();
     if (quantity <= 0) {
-      toast.error("Please enter a valid quantity");
+      toast.error("Please enter a valid quantity", { autoClose: 2000 });
       return;
     }
 
@@ -30,7 +30,9 @@ const TradeModal = ({ isOpen, onClose, stock, type }) => {
       setQuantity(1);
     } catch (error) {
       console.log(error);
-      toast.error(error.response?.data?.message || "Trade failed");
+      toast.error(error.response?.data?.message || "Trade failed", {
+        autoClose: 2000,
+      });
     } finally {
       setLoading(false);
     }
