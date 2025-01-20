@@ -1,17 +1,23 @@
 import { Outlet } from "react-router-dom";
 import { CustomSideBar } from "@/components/dashboard/Sidebar";
-import { useAuth } from "@/context/AuthContext";
+import { Navbar } from "flowbite-react";
 
 export function Dashboard() {
-  const { user } = useAuth();
-
   return (
-    <div className="container p-4">
-      <h1 className="text-3xl font-bold text-gray-800 mb-2">Hi! {user.username}</h1>
-      <CustomSideBar />
-      <div className="flex-1 p-3 overflow-auto">
-        <Outlet />
+    <>
+      <Navbar fluid rounded className="border-b">
+        <Navbar.Brand href="#">
+          <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
+            VEST Dashboard
+          </span>
+        </Navbar.Brand>
+      </Navbar>
+      <div className="flex flex-row w-full">
+        <CustomSideBar />
+        <div className="flex-1 p-3 overflow-auto">
+          <Outlet />
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, jsonify, request
 from ..schemas.historical_price_schema import historical_prices_schema
 from ..services.historical_price_service import HistoricalPriceService
+from flask_jwt_extended import jwt_required
 
 historical_price_bp = Blueprint(
     "historical_price", __name__, url_prefix="/historical_prices"
@@ -9,6 +10,7 @@ historical_price_bp = Blueprint(
 
 
 @historical_price_bp.route("/", methods=["GET"])
+@jwt_required()
 def get_historical_prices():
     symbol = request.args.get("symbol")
     from_date = request.args.get("from_date")

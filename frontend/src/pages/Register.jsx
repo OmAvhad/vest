@@ -10,6 +10,8 @@ export function Register() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+
   const navigate = useNavigate();
   const { register } = useAuth();
 
@@ -29,9 +31,9 @@ export function Register() {
         return;
       }
 
-      await register(name, username, password);
+      await register(name, username, password, email);
       navigate("/dashboard");
-      toast.success("Login successful");
+      toast.success("Registration successful");
     } catch (error) {
       toast.error(error.response.data.message, {
         autoClose: 2000,
@@ -70,6 +72,18 @@ export function Register() {
           </div>
           <div>
             <div className="mb-2 block">
+              <Label htmlFor="email" value="Your email" />
+            </div>
+            <TextInput
+              id="email"
+              type="email"
+              placeholder="johndoe@gmail.com"
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <div className="mb-2 block">
               <Label htmlFor="password1" value="Your password" />
             </div>
             <TextInput
@@ -79,7 +93,9 @@ export function Register() {
               required
             />
           </div>
-          <Button className="bg-blue-500 hover:bg-blue-600" type="submit">Submit</Button>
+          <Button className="bg-blue-500 hover:bg-blue-600" type="submit">
+            Submit
+          </Button>
           <div className="flex justify-between">
             <Link to="/">
               <HiArrowLeft className="text-xl text-blue-500" />

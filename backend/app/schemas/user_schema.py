@@ -1,4 +1,4 @@
-from marshmallow import Schema, fields, validate
+from marshmallow import Schema, fields
 
 
 class UserSchema(Schema):
@@ -6,6 +6,10 @@ class UserSchema(Schema):
     name = fields.Str(required=True)
     username = fields.Str(required=True)
     password_hash = fields.Str(required=True, load_only=True)
+    email = fields.Email(required=True)
+    user_type = fields.Str(required=True)
+    broker = fields.Str(required=True)
+    balance = fields.Float(required=True)
 
 
 user_schema = UserSchema()

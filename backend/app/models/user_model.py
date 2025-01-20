@@ -8,6 +8,10 @@ class User(db.Model):
     name = db.Column(db.String, nullable=False)
     username = db.Column(db.String, nullable=False, unique=True)
     password_hash = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, nullable=False)
+    user_type = db.Column(db.String, nullable=False, default="individual")
+    broker = db.Column(db.String, nullable=True, default="ZERODHA")
+    balance = db.Column(db.Float, nullable=False, default=0.0)
 
     def save(self):
         db.session.add(self)

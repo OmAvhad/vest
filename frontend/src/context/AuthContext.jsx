@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = Cookies.get("accessToken");
       if (token) {
-        const response = await api.get("/users/me", {
+        const response = await api.get("/users/profile", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(response.data.username);
@@ -39,11 +39,12 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true);
   };
 
-  const register = async (name, username, password) => {
+  const register = async (name, username, password, email) => {
     const response = await api.post("/users/register", {
       name,
       username,
       password,
+      email
     });
     Cookies.set("accessToken", response.data.access_token);
     Cookies.set("refreshToken", response.data.refresh_token);

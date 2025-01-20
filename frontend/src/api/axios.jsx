@@ -5,7 +5,7 @@ const api = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
-axios.interceptors.request.use((config) => {
+api.interceptors.request.use((config) => {
   const accessToken = Cookies.get("accessToken");
   if (accessToken) {
     config.headers["Authorization"] = `Bearer ${accessToken}`;

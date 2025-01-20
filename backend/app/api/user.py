@@ -19,13 +19,14 @@ def register_user():
     username = request.json.get("username")
     password = request.json.get("password")
     name = request.json.get("name")
+    email = request.json.get("email")
 
-    if not username or not password or not name:
+    if not username or not password or not name or not email:
         return jsonify({"message": "Invalid payload"}), 400
 
     try:
         user = UserService.create(
-            {"name": name, "username": username, "password": password}
+            {"name": name, "username": username, "password": password, "email": email}
         )
     except UserAlreadyExistsError as e:
         return jsonify({"message": str(e)}), 400
@@ -87,9 +88,52 @@ def refresh():
     return jsonify({"access_token": access_token}), 200
 
 
-@user_bp.route("/me", methods=["GET"])
+@user_bp.route("/protected", methods=["POST"])
+@jwt_required()
+def protected():
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
+
+
+@user_bp.route("/profile", methods=["GET"])
 @jwt_required()
 def me():
     current_user = get_jwt_identity()
     user = UserService.get_by_username(current_user)
     return jsonify(user_schema.dump(user)), 200
+
+
+@user_bp.route("/add-money", methods=["POST"])
+@jwt_required()
+def add_money():
+    current_user = get_jwt_identity()
+    amount = request.json.get("amount")
+    try:
+        user = UserService.add_money(current_user, amount)
+        return (
+            jsonify({"message": "Money added successfully", "balance": user.balance}),
+            200,
+        )
+    except ValueError as e:
+        return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        return jsonify({"message": "Failed to add money", "error": str(e)}), 500
+
+
+@user_bp.route("/withdraw-money", methods=["POST"])
+@jwt_required()
+def withdraw_money():
+    current_user = get_jwt_identity()
+    amount = request.json.get("amount")
+    try:
+        user = UserService.withdraw_money(current_user, amount)
+        return (
+            jsonify(
+                {"message": "Money withdrawn successfully", "balance": user.balance}
+            ),
+            200,
+        )
+    except ValueError as e:
+        return jsonify({"message": str(e)}), 400
+    except Exception as e:
+        return jsonify({"message": "Failed to withdraw money", "error": str(e)}), 500

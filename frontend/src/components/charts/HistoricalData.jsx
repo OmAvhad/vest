@@ -1,37 +1,25 @@
-// import { TrendingUp } from "lucide-react";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import { useEffect, useState } from "react";
 import { Datepicker } from "flowbite-react";
 import api from "@/api/axios";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  //   CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
-  //   SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 
 const chartConfig = {
   desktop: {
-    label: "Desktop",
+    label: "Price",
     color: "hsl(var(--chart-1))",
   },
 };
@@ -40,30 +28,16 @@ export function HistoricalData() {
   const [symbol, setSymbol] = useState("NIFTY 50");
   const [fromDate, setFromDate] = useState("2017-01-02");
   const [toDate, setToDate] = useState("2017-12-31");
-
   const [historicalPrices, setHistoricalPrices] = useState([]);
 
   useEffect(() => {
-    // Query params
     const params = new URLSearchParams();
-    if (symbol) {
-      params.append("symbol", symbol);
-    }
-    if (fromDate) {
-      params.append(
-        "from_date",
-        new Date(fromDate).toLocaleDateString("en-CA") // YYYY-MM-DD format
-      );
-    }
-    if (toDate) {
-      params.append(
-        "to_date",
-        new Date(toDate).toLocaleDateString("en-CA") // YYYY-MM-DD format
-      );
-    }
+    if (symbol) params.append("symbol", symbol);
+    if (fromDate) params.append("from_date", new Date(fromDate).toLocaleDateString("en-CA"));
+    if (toDate) params.append("to_date", new Date(toDate).toLocaleDateString("en-CA"));
 
     api
-      .get("/historical_prices", { params })
+      .get("/historical_prices/", { params })
       .then((response) => {
         setHistoricalPrices(response.data);
       })
@@ -72,93 +46,122 @@ export function HistoricalData() {
       });
   }, [symbol, fromDate, toDate]);
 
+  const formatPrice = (value) => {
+    return new Intl.NumberFormat('en-IN', {
+      maximumFractionDigits: 2,
+      style: 'currency',
+      currency: 'INR'
+    }).format(value);
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Line Chart</CardTitle>
-        <CardDescription>Historical data visualization</CardDescription>
-        <div className="flex gap-2 justify-center items-center">
-          <div className="text-sm">Symbol:</div>
-          <Select onValueChange={(e) => setSymbol(e)} value={symbol}>
-            <SelectTrigger className="w-[180px] h-[40px]">
-              <SelectValue placeholder="Select a symbol" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="NIFTY 50">NIFTY 50</SelectItem>
-                <SelectItem value="NIFTY BANK">NIFTY BANK</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-          <div className="text-sm">From:</div>
-          <Datepicker
-            defaultValue={new Date("2017-01-02")}
-            minDate={new Date("2017-01-02")}
-            maxDate={new Date("2021-12-31")}
-            onChange={(date) => setFromDate(date)}
-          />
-          <div className="text-sm">To:</div>
-          <Datepicker
-            defaultValue={new Date("2021-12-31")}
-            minDate={new Date("2017-01-02")}
-            maxDate={new Date("2021-12-31")}
-            onChange={(date) => setToDate(date)}
-          />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
-          <LineChart
-            accessibilityLayer
-            data={historicalPrices}
-            margin={{
-              left: 12,
-              right: 12,
-            }}
-          >
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) =>
-                new Date(value).toLocaleDateString("en-US", {
-                  month: "short",
-                  year: "numeric",
-                })
-              }
-            />
-            <YAxis
-              dataKey="price"
-              tickLine={false}
-              axisLine={false}
-              //   tickMargin={}
-              tickCount={10}
-              tickFormatter={(value) => `${value.toFixed(2)}`}
-            />
-            <ChartTooltip
-              cursor={false}
-              content={<ChartTooltipContent hideLabel />}
-            />
-            <Line
-              dataKey="price"
-              type="linear"
-              stroke="var(--color-desktop)"
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ChartContainer>
-      </CardContent>
-      {/* <CardFooter className="flex-col items-start gap-2 text-sm">
-        <div className="flex gap-2 font-medium leading-none">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-        </div>
-        <div className="leading-none text-muted-foreground">
-          Showing total visitors for the last 6 months
-        </div>
-      </CardFooter> */}
-    </Card>
+    <div className="w-full max-w-6xl mx-auto p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Market Index Chart</h1>
+        <p className="text-gray-500 mt-2">Historical price data visualization</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <div className="flex flex-wrap gap-4 justify-start items-center">
+            <div className="flex items-center gap-2">
+              <div className="text-sm font-medium">Symbol:</div>
+              <Select onValueChange={(e) => setSymbol(e)} value={symbol}>
+                <SelectTrigger className="w-[180px] h-[40px]">
+                  <SelectValue placeholder="Select a symbol" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="NIFTY 50">NIFTY 50</SelectItem>
+                    <SelectItem value="NIFTY BANK">NIFTY BANK</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="text-sm font-medium">From:</div>
+              <Datepicker
+                value={new Date(fromDate)}
+                minDate={new Date("2017-01-02")}
+                maxDate={new Date("2021-12-31")}
+                onChange={(date) => setFromDate(date)}
+                className="w-[180px]"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="text-sm font-medium">To:</div>
+              <Datepicker
+                value={new Date(toDate)}
+                minDate={new Date("2017-01-02")}
+                maxDate={new Date("2021-12-31")}
+                onChange={(date) => setToDate(date)}
+                className="w-[180px]"
+              />
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          <div className="h-[500px] w-full">
+            <ChartContainer config={chartConfig}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={historicalPrices}
+                  margin={{
+                    top: 20,
+                    right: 30,
+                    left: 30,
+                    bottom: 20,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={12}
+                    tickFormatter={(value) =>
+                      new Date(value).toLocaleDateString("en-US", {
+                        month: "short",
+                        year: "numeric",
+                      })
+                    }
+                  />
+                  <YAxis
+                    dataKey="price"
+                    tickLine={false}
+                    axisLine={false}
+                    tickMargin={12}
+                    tickCount={8}
+                    tickFormatter={(value) => formatPrice(value)}
+                  />
+                  <ChartTooltip
+                    cursor={false}
+                    content={
+                      <ChartTooltipContent
+                        hideLabel
+                        valueFormatter={(value) => formatPrice(value)}
+                      />
+                    }
+                  />
+                  <Line
+                    dataKey="price"
+                    type="monotone"
+                    stroke="var(--color-desktop)"
+                    strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
+
+export default HistoricalData;
