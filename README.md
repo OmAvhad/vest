@@ -3,11 +3,18 @@
 Simplifying stock trading.
 
 ## Screenshots
+
 ![S1](/frontend/public/images/holdings.png)
 ![S4](/frontend/public/images/chart.png)
 ![S3](/frontend/public/images/profile.png)
 
+## Deployment
+
+- **Frontend** - [https://vest-two.vercel.app/](https://vest-two.vercel.app/)
+- **Backend** - [https://vest-jhuk.onrender.com/](https://vest-jhuk.onrender.com/)
+
 ## Features
+
 - Real-time stock data
 - Buy and sell stocks
 - View transaction history
@@ -66,11 +73,12 @@ Simplifying stock trading.
      npm install
      ```
   3. Create a `.env` file in the frontend directory by referring to the `.env.sample` file
-    4. Run the frontend server
-        ```bash
-        npm start
-        ```
+  4. Run the frontend server
+     ```bash
+     npm start
+     ```
 
 ## API Documentation
 
+Explore the full API documentation on Postman:
 [https://documenter.getpostman.com/view/19388406/2sAYQamrN4](https://documenter.getpostman.com/view/19388406/2sAYQamrN4)
