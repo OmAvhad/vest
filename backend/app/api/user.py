@@ -3,6 +3,10 @@ from ..schemas.user_schema import user_schema
 from ..services.user_service import UserService
 from ..exceptions.user_exception import UserAlreadyExistsError
 from ..exceptions.exceptions import InvalidPasswordError
+from ..services.user_service import UserService
+from ..services.holding_service import HoldingService
+from ..schemas.holding_schema import holdings_schema
+
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import (
     create_access_token,
@@ -92,7 +96,7 @@ def refresh():
 @jwt_required()
 def protected():
     current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
+    return jsonify(username=current_user), 200
 
 
 @user_bp.route("/profile", methods=["GET"])
@@ -137,3 +141,12 @@ def withdraw_money():
         return jsonify({"message": str(e)}), 400
     except Exception as e:
         return jsonify({"message": "Failed to withdraw money", "error": str(e)}), 500
+
+
+@user_bp.route("/holdings", methods=["GET"])
+@jwt_required()
+def get_my_holdings():
+    current_user = get_jwt_identity()
+    user_id = UserService.get_by_username(current_user).id
+    holdings = HoldingService.get_holdings_by_user_id(user_id)
+    return jsonify(holdings_schema.dump(holdings)), 200

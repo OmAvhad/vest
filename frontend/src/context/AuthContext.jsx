@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import api from "@/api/axios";
+import { api } from "@/api/axios";
 
 const AuthContext = createContext(null);
 
@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = Cookies.get("accessToken");
       if (token) {
-        const response = await api.get("/users/profile", {
+        const response = await api.get("/users/protected", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(response.data.username);

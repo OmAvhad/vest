@@ -1,8 +1,10 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
+const base_api_url = import.meta.env.VITE_API_URL;
+
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: `${base_api_url}/api`,
 });
 
 api.interceptors.request.use((config) => {
@@ -13,7 +15,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-axios.interceptors.response.use(
+api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
@@ -41,4 +43,4 @@ axios.interceptors.response.use(
   }
 );
 
-export default api;
+export { api, base_api_url };

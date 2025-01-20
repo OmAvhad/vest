@@ -25,3 +25,10 @@ class StockService:
     @staticmethod
     def get_by_id(id):
         return Stock.query.get(id)
+
+    @staticmethod
+    def update_price(symbol, price):
+        stock = Stock.query.filter_by(trading_symbol=symbol).first()
+        stock.current_price = price
+        stock.save()
+        return stock

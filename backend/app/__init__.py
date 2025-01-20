@@ -19,6 +19,8 @@ def create_app():
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
 
+    app.config["SECRET_KEY"] = os.getenv("SOCKET_IO_SECRET_KEY")
+
     # Configure CORS
     CORS(app)
 

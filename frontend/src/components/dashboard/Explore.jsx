@@ -1,131 +1,86 @@
-import { useState, useEffect } from "react";
-import { Card, Modal } from "flowbite-react";
+import { useState, useEffect, useCallback } from "react";
+import { Card, Spinner } from "flowbite-react";
 import { toast } from "react-toastify";
-import api from "@/api/axios";
-
-const TradeModal = ({ isOpen, onClose, stock, type }) => {
-  const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(false);
-
-  const handleTrade = async (e) => {
-    e.preventDefault();
-    if (quantity <= 0) {
-      toast.error("Please enter a valid quantity");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      await api.post("/orders/", {
-        stock_id: stock.id,
-        quantity: parseInt(quantity),
-        order_type: type,
-      });
-
-      toast.success(
-        `Successfully placed ${type} order for ${stock.trading_symbol}`,
-        { autoClose: 2000 }
-      );
-      onClose();
-      setQuantity(1);
-    } catch (error) {
-      console.log(error);
-      toast.error(error.response?.data?.message || "Trade failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const totalAmount = stock?.current_price * quantity || 0;
-
-  return (
-    <Modal show={isOpen} onClose={onClose}>
-      <Modal.Header>
-        {type === "buy" ? "Buy" : "Sell"} {stock?.trading_symbol}
-      </Modal.Header>
-      <Modal.Body>
-        <div className="space-y-4">
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-900">
-              Current Price
-            </label>
-            <input
-              type="text"
-              className="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-              value={stock?.current_price || 0}
-              disabled
-            />
-          </div>
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-900">
-              Quantity
-            </label>
-            <input
-              type="number"
-              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-              value={quantity}
-              onChange={(e) =>
-                setQuantity(Math.max(1, parseInt(e.target.value) || 0))
-              }
-              min="1"
-            />
-          </div>
-          <div>
-            <label className="block mb-2 text-sm font-medium text-gray-900">
-              Total Amount
-            </label>
-            <input
-              type="text"
-              className="bg-gray-100 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-              value={totalAmount.toFixed(2)}
-              disabled
-            />
-          </div>
-        </div>
-      </Modal.Body>
-      <Modal.Footer>
-        <button
-          className={`${
-            type === "buy"
-              ? "bg-blue-500 hover:bg-blue-700"
-              : "bg-red-500 hover:bg-red-700"
-          } text-white font-bold py-2 px-4 rounded`}
-          onClick={handleTrade}
-          disabled={loading}
-        >
-          {loading ? "Processing..." : `Place ${type} Order`}
-        </button>
-        <button
-          className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded ml-2"
-          onClick={onClose}
-        >
-          Cancel
-        </button>
-      </Modal.Footer>
-    </Modal>
-  );
-};
+import { api, base_api_url } from "@/api/axios";
+import TradeModal from "@/components/dashboard/TradeModal";
+import { io } from "socket.io-client";
 
 export function Explore() {
   const [stocks, setStocks] = useState([]);
+  const [isSocketConnected, setIsSocketConnected] = useState(false);
+  const [isLoading, setLoading] = useState(true);
+  const [selectedStock, setSelectedStock] = useState(null);
+  const [tradeType, setTradeType] = useState("buy");
+  const [showModal, setShowModal] = useState(false);
+
+  // Move stock update logic to a callback
+  const handleStockUpdate = useCallback((data) => {
+    console.log("Stock price update", data);
+    setStocks((currentStocks) =>
+      currentStocks.map((stock) => {
+        if (stock.trading_symbol === data.trading_symbol) {
+          return {
+            ...stock,
+            current_price: data.current_price,
+          };
+        }
+        return stock;
+      })
+    );
+  }, []);
 
   useEffect(() => {
+    let socket;
+
+    const initializeSocket = () => {
+      socket = io(base_api_url, {
+        transports: ["websocket", "polling"],
+      });
+
+      socket.on("connect", () => {
+        console.log("Connected to the server");
+        setIsSocketConnected(true);
+      });
+
+      socket.on("message", (data) => {
+        console.log(data);
+      });
+
+      socket.on("stock_price_update", handleStockUpdate);
+
+      socket.on("disconnect", () => {
+        console.log("Disconnected from the server");
+        setIsSocketConnected(false);
+      });
+    };
+
     const fetchStocks = async () => {
       try {
         const { data } = await api.get("/stocks/");
         setStocks(data);
+        setLoading(false);
       } catch (error) {
         console.log(error);
         toast.error("Failed to fetch stocks");
+        setLoading(false);
       }
     };
 
+    // Initialize socket first, then fetch stocks
+    initializeSocket();
     fetchStocks();
-  }, []);
 
-  const [selectedStock, setSelectedStock] = useState(null);
-  const [tradeType, setTradeType] = useState("buy");
-  const [showModal, setShowModal] = useState(false);
+    // Cleanup function
+    return () => {
+      if (socket) {
+        socket.off("connect");
+        socket.off("message");
+        socket.off("stock_price_update");
+        socket.off("disconnect");
+        socket.disconnect();
+      }
+    };
+  }, [handleStockUpdate]); // Add handleStockUpdate to dependencies
 
   const handleTrade = (stock, type) => {
     setSelectedStock(stock);
@@ -145,6 +100,17 @@ export function Explore() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">Explore Stocks</h1>
+      <div className="mb-4">
+        <p
+          className={`text-sm ${
+            isSocketConnected ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {isSocketConnected
+            ? "Socket is connected"
+            : "Socket is not connected"}
+        </p>
+      </div>
       <div className="grid gap-1">
         {stocks.map((stock) => {
           const dayChange = calculateDayChange(
@@ -165,7 +131,9 @@ export function Explore() {
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-bold">₹{stock.current_price}</p>
+                  <p className="text-xl font-bold">
+                    ₹{stock.current_price.toFixed(2)}
+                  </p>
                   <p
                     className={`text-sm ${
                       isPositive ? "text-green-600" : "text-red-600"
@@ -195,6 +163,16 @@ export function Explore() {
           );
         })}
       </div>
+      {isLoading && (
+        <div className="text-center py-8">
+          <Spinner className="w-8 h-8" />
+        </div>
+      )}
+      {!isLoading && stocks.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No stocks found</p>
+        </div>
+      )}
 
       <TradeModal
         isOpen={showModal}

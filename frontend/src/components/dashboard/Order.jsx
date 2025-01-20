@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
-import { Card, Dropdown } from "flowbite-react";
+import { Card, Dropdown, Spinner } from "flowbite-react";
 import { Calendar, Clock, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
-import api from "@/api/axios";
+import { api } from "@/api/axios";
 
 export function OrdersHistory() {
   const [orders, setOrders] = useState([]);
-
   const [filter, setFilter] = useState("all"); // 'all', 'buy', 'sell'
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     api.get("/orders/").then((response) => {
       setOrders(response.data);
+      setLoading(false);
     });
   }, []);
 
@@ -109,11 +110,15 @@ export function OrdersHistory() {
             </div>
           </Card>
         ))}
-
+        {isLoading && (
+          <div className="text-center py-8">
+            <Spinner className="w-8 h-8" />
+          </div>
+        )}
         {filteredOrders.length === 0 && (
-          <Card className="text-center py-8">
+          <div className="text-center py-8">
             <p className="text-gray-500">No orders found</p>
-          </Card>
+          </div>
         )}
       </div>
     </div>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal } from "flowbite-react";
 import { toast } from "react-toastify";
-import api from "@/api/axios";
+import { api } from "@/api/axios";
 
 const MoneyManagementModal = ({
   isOpen,

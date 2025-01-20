@@ -1,4 +1,4 @@
-import { Button, Label, TextInput } from "flowbite-react";
+import { Button, Label, TextInput, Spinner } from "flowbite-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -10,6 +10,7 @@ export function Register() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
 
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       // check if password is at least 8 characters, contains a number, and a special character and capital letter
       if (
@@ -38,6 +40,8 @@ export function Register() {
       toast.error(error.response.data.message, {
         autoClose: 2000,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,9 +97,13 @@ export function Register() {
               required
             />
           </div>
-          <Button className="bg-blue-500 hover:bg-blue-600" type="submit">
-            Submit
-          </Button>
+          {loading ? (
+            <Spinner className="w-10 h-10 text-blue-500" />
+          ) : (
+            <Button className="bg-blue-500 hover:bg-blue-600" type="submit">
+              Submit
+            </Button>
+          )}
           <div className="flex justify-between">
             <Link to="/">
               <HiArrowLeft className="text-xl text-blue-500" />

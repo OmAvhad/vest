@@ -1,4 +1,4 @@
-import { Button, Label, TextInput } from "flowbite-react";
+import { Button, Label, TextInput, Spinner } from "flowbite-react";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -8,17 +8,21 @@ import { HiArrowLeft } from "react-icons/hi";
 export function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       await login(username, password);
       navigate("/dashboard");
       toast.success("Login successful", { autoClose: 2000 });
     } catch (error) {
       toast.error(error.response.data.message, { autoClose: 2000 });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -34,7 +38,7 @@ export function Login() {
             <TextInput
               id="username"
               type="text"
-              placeholder="name@flowbite.com"
+              placeholder="name@example.com"
               onChange={(e) => setUsername(e.target.value)}
               required
             />
@@ -50,7 +54,15 @@ export function Login() {
               required
             />
           </div>
-          <Button className="bg-blue-500 hover:bg-blue-600" type="submit">Submit</Button>
+          {loading ? (
+            <div className="flex justify-center">
+              <Spinner className="w-10 h-10 text-blue-500" />
+            </div>
+          ) : (
+            <Button className="bg-blue-500 hover:bg-blue-600" type="submit">
+              Submit
+            </Button>
+          )}
           <div className="flex justify-between">
             <Link to="/">
               <HiArrowLeft className="text-xl text-blue-500" />

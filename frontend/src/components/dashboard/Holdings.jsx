@@ -1,18 +1,21 @@
-import { Table, Card } from "flowbite-react";
+import { Table, Card, Spinner } from "flowbite-react";
 import { useState, useEffect } from "react";
-import api from "@/api/axios";
+import { api } from "@/api/axios";
 import { TrendingDown, TrendingUp } from "lucide-react";
 
 export function Holdings() {
   const [holdings, setHoldings] = useState([]);
+  const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchHoldings() {
       try {
-        const response = await api.get("/holdings/");
+        const response = await api.get("/users/holdings");
         setHoldings(response.data);
       } catch (error) {
         console.log(error);
+      } finally {
+        setLoading(false);
       }
     }
 
@@ -28,7 +31,7 @@ export function Holdings() {
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "INR",
     }).format(value);
   };
 
@@ -91,9 +94,9 @@ export function Holdings() {
               <Table.Cell>{item.stock.exchange}</Table.Cell>
               <Table.Cell>{item.stock.isin}</Table.Cell>
               <Table.Cell>{item.quantity}</Table.Cell>
-              <Table.Cell>{item.average_price}</Table.Cell>
-              <Table.Cell>{item.stock.current_price}</Table.Cell>
-              <Table.Cell>{item.stock.close_price}</Table.Cell>
+              <Table.Cell>{item.average_price.toFixed(2)}</Table.Cell>
+              <Table.Cell>{item.stock.current_price.toFixed(2)}</Table.Cell>
+              <Table.Cell>{item.stock.close_price.toFixed(2)}</Table.Cell>
               <Table.Cell>{item.pnl.toFixed(2)}</Table.Cell>
               <Table.Cell>{item.day_change.toFixed(2)}</Table.Cell>
               <Table.Cell>{item.day_change_percentage.toFixed(2)}%</Table.Cell>
@@ -101,6 +104,16 @@ export function Holdings() {
           ))}
         </Table.Body>
       </Table>
+      {isLoading && (
+        <div className="text-center py-8">
+          <Spinner className="w-8 h-8" />
+        </div>
+      )}
+      {holdings.length === 0 && (
+        <div className="text-center py-8">
+          <p className="text-gray-500">No holdings found</p>
+        </div>
+      )}
     </div>
   );
 }
