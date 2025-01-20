@@ -53,9 +53,9 @@ Simplifying stock trading for everyone
      pip3 install -r requirements.txt
      ```
   3. Create a `.env` file in the frontend directory by referring to the `.env.sample` file
-  4. Migrate the database
+  4. Run the migrations
      ```bash
-     flask db migrate
+     flask db upgrade
      ```
   5. Run the backend server
      ```bash
