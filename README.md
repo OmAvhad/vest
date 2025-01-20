@@ -1,6 +1,10 @@
 # Vest
 
-Simplifying stock trading.
+Simplifying stock trading for everyone
+
+## Demo
+
+🎥 Video Demo : https://youtu.be/7SEhi-6lGt0 
 
 ## Screenshots
 
